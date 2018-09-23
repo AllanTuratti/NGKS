@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^produto/$', views.produto, name='produto'),
     url(r'^produtos/', include(('catalogo.urls','catalogo'), namespace='catalogo')),
     url(r'^admin/', admin.site.urls),
+    url(r'^sobrenos', views.sobrenos, name='sobrenos')
 ]

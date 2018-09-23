@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #libs
+    'widget_tweaks',
+    #apps
     'core',
     'catalogo'
 ]
@@ -82,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'NGKS_Shop',
         'USER': 'root',
-        'PASSWORD': 'senha123',
+        'PASSWORD': 'NEWPASSWORD',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -126,3 +129,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+#e-mail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'gerejapa@gmail.com'
+EMAIL_HOST_PASSWORD = 'gere1986'
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'gerejapa@gmail.com'
+
+
+
