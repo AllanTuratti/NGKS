@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #libs
+    'widget_tweaks',
+    #apps
     'core',
     'catalogo'
 ]
@@ -126,3 +129,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#e-mail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'gerejapa@gmail.com'
+EMAIL_HOST_PASSWORD = 'gere1986'
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'admin@djangoecommerce.com'
+
+#Auth
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
