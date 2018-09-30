@@ -39,3 +39,6 @@ class Produto(models.Model):
     
     def __str__(self):
         return self.nome
+    
+    def get_absolute_url(self):
+        return reverse('catalogo:produto', kwargs={'slug':self.slug})
