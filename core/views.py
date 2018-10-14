@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from .forms import contato_forms
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, CreateView
 
 
 
@@ -25,4 +25,5 @@ def contato(request):
         'success': success
     }
     return render(request, 'contato.html', contexto)
+
 
