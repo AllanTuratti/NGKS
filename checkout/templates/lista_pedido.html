@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% load pagination %}
+
+{% block title %}
+Meus Pedidos
+{% endblock %}
+
+{% block container %}
+<h2>Meus Pedidos</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>
+                ID
+            </th>
+            <th>
+                Produtos
+            </th>
+            <th>
+                Situação
+            </th>
+            <th>
+                Data
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pedido in object_list %}
+        <tr>
+            <td>
+                <a href="{% url 'checkout:detalhe_pedido' pedido.pk %}">#{{ pedido.pk }}</a>
+            </td>
+            <td>
+                {% for produto in pedido.produtos %}
+                {{ produto.nome }}{% if not forloop.last %}<br />{% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {{ pedido.get_status_display }}
+            </td>
+            <td>
+                {{ pedido.criado|date:"d/m/Y" }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% pagination request paginator page_obj %}
+{% endblock %}
+ 
