@@ -6,8 +6,6 @@ from django.conf import settings
 from .forms import contato_forms
 from django.views.generic import View, TemplateView, CreateView
 
-
-
 class indexView(TemplateView):
     
     template_name = 'index.html'

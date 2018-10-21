@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     #apps
     'core',
-    'catalogo'
+    'catalogo',
+    'checkout',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'checkout.middleware.cart_item_middleware',
 ]
 
 ROOT_URLCONF = 'NGKS.urls'
@@ -134,11 +137,14 @@ STATIC_URL = '/static/'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'gerejapa@gmail.com'
-EMAIL_HOST_PASSWORD = 'gere1986'
+EMAIL_HOST_USER = 'allan.turatti@gmail.com'
+EMAIL_HOST_PASSWORD = 'Alnmrt132@'
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'admin@djangoecommerce.com'
 
 #Auth
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index'
+
+#MESSAGE
+

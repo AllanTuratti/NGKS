@@ -11,18 +11,7 @@
 </div>
 <div class="row">
     {% for Produto in lista_produto %}
-    <div class="col-sm-6 col-md-4">
-        <div class="thumbnail">
-            <a href="{{ Produto.get_absolute_url }}">
-                <img src="http://placehold.it/350x250" alt="" />
-            </a>
-            <div class="caption">
-                <h3>{{ Produto }}</h3>
-                {{ Produto.descricao|linebreaks }}
-                <p><a href="{{ Produto.get_absolute_url }}" class="btn btn-success" role="button">Button</a> <a href="#" class="btn btn-default" role="button">Button</a></p>
-            </div>
-        </div>
-    </div>
+    {% include "_produto.html" %}
     {% endfor %}
 </div>
 

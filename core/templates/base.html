@@ -41,17 +41,26 @@
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
             <li><a href="#">Ola,{{user}}</a></li>
-            <li><a href="sair">Sair</a></li>
+            <li><a href="{% url 'logout' %}">Sair</a></li>
             
             {% else %}
-             <li><a href="entrar">Entrar</a></li>
+            <li><a href="{% url 'login' %}">Entrar</a></li>
             {% endif %}
+            <li><a href="{% url 'checkout:lista_pedido' %}">Meus pedidos</a></li>
+            <li><a href="{% url 'checkout:cart_item' %}">Carrinho</a></li>
           </ul>
         </div>
       </div>
     </div>
     <div class="container">
-		{% block container %}{% endblock %}
+      {% block messages %}
+      {% for message in message%}
+      <div class="alert alert-{{ message.tags }}">
+        {{message}}
+      </div>
+      {%endfor%}
+      {%endblock%}
+		{% block container %}
 		<footer>
 			<div class="row">
 			  <div class="col-lg-12">
@@ -65,7 +74,8 @@
 			  </div>
 			</div>
 		</footer>
-	</div>
+  </div>
+  {% endblock %}
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="{% static 'assets/bootstrap.min.js' %}"></script>
 </body>
