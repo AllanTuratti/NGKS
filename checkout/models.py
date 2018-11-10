@@ -121,13 +121,13 @@ class Pedido(models.Model):
         self.opcao_pagamento = 'pagseguro'
         self.save()
         pg = PagSeguro(
-            email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN, 
+            email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN,
             config={'sandbox': settings.PAGSEGURO_SANDBOX}
         )
-        pg.sender= {
-            'email':self.user.email
+        pg.sender = {
+            'email': self.user.email
         }
-        pg.reference_prefix = None
+        pg.reference_prefix = ''
         pg.shipping = None
         pg.reference = self.pk
         for item in self.items.all():
@@ -135,8 +135,8 @@ class Pedido(models.Model):
                 {
                     'id': item.produto.pk,
                     'description': item.produto.nome,
-                    'Quantity': item.quantidade,
-                    'amount': '%.2f' % item.preco,
+                    'quantity': item.quantidade,
+                    'amount': '%.2f' % item.preco
                 }
             )
         return pg

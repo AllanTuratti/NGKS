@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import modelformset_factory
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
 from catalogo.models import Produto
 from .models import CartItem, Pedido
@@ -122,8 +122,8 @@ class PagSeguroView(LoginRequiredMixin, RedirectView):
             reverse('checkout:pagseguro_notification')
         )
         response = pg.checkout()
-        return response.payment_url
-        
+        return response.payment_url        
+
 class PaypalView(LoginRequiredMixin, TemplateView):
 
     template_name = 'paypal.html'
@@ -172,11 +172,11 @@ def pagseguro_notification(request):
 
 def paypal_notification(sender, **kwargs):
     ipn_obj = sender
-    if ipn_obj.status == ST_PP_COMPLETED and \
+    if ipn_obj.payment_status == ST_PP_COMPLETED and \
         ipn_obj.receiver_email == settings.PAYPAL_EMAIL:
         try:
-            order = Pedido.objects.get(pk=ipn_obj.invoice)
-            order.complete()
+            pedido = Pedido.objects.get(pk=ipn_obj.invoice)
+            pedido.complete()
         except Pedido.DoesNotExist:
             pass
 
