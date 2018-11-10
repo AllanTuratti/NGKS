@@ -14,7 +14,7 @@ Pedido #{{ order.pk }}
     <dt>Data</dt>
     <dd>{{ object.criado|date:"d/m/Y H:i" }}</dd>
     <dt>Meio de Pagamento</dt>
-    <dd>{{ object.get_payment_option_display }}</dd>
+    <dd>{{ object.opcao_pagamento}}</dd>
 </dl>
 <h3>Itens do Pedido</h3>
 {% for item in object.items.all %}

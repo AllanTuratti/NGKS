@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from catalogo.models import Produto
+from pagseguro import PagSeguro
+
 # Create your models here.
 
 class CartItemManager(models.Manager):
@@ -67,7 +69,6 @@ class Pedido(models.Model):
     PAYMENT_OPTION_CHOICES = (  
         ('pagseguro', 'Pagseguro'),
         ('paypal', 'Paypal'),
-        ('deposit', 'Deposito'),
     )
 
     user = models.ForeignKey(
@@ -78,7 +79,6 @@ class Pedido(models.Model):
     )
     opcao_pagamento = models.CharField(
         'Opação de Pagamento', choices= PAYMENT_OPTION_CHOICES, max_length=20,
-        default='deposit'
     )
 
     criado = models.DateTimeField('Criado em', auto_now_add=True)
@@ -96,6 +96,69 @@ class Pedido(models.Model):
     def produtos(self):
         produtos_ids = self.items.values_list('produto')
         return Produto.objects.filter(pk__in=produtos_ids)
+
+    def total(self):
+        aggregate_queryset = self.items.aggregate(
+            total=models.Sum(
+                models.F('preco') * models.F('quantidade'),
+                output_field=models.DecimalField()
+            )
+        )
+        return aggregate_queryset['total']
+        
+    def pagseguro_update_status(self, status):
+        if status == '3':
+            self.status = 1
+        elif status == '7':
+            self.status = 2
+        self.save()
+    
+    def complete(self):
+        self.status = 1
+        self.save()
+
+    def pagseguro(self):
+        self.opcao_pagamento = 'pagseguro'
+        self.save()
+        pg = PagSeguro(
+            email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN, 
+            config={'sandbox': settings.PAGSEGURO_SANDBOX}
+        )
+        pg.sender= {
+            'email':self.user.email
+        }
+        pg.reference_prefix = None
+        pg.shipping = None
+        pg.reference = self.pk
+        for item in self.items.all():
+            pg.items.append(
+                {
+                    'id': item.produto.pk,
+                    'description': item.produto.nome,
+                    'Quantity': item.quantidade,
+                    'amount': '%.2f' % item.preco,
+                }
+            )
+        return pg
+
+    def paypal(self):
+        self.opcao_pagamento = 'paypal'
+        self.save()
+        paypal_dict = {
+            'upload': '1',
+            'business': settings.PAYPAL_EMAIL,
+            'invoice': self.pk,
+            'cmd': '_cart',
+            'currency_code': 'BRL',
+            'charset': 'utf-8',
+        }
+        index = 1
+        for item in self.items.all():
+            paypal_dict['amount_{}'.format(index)] = '%.2f' % item.preco
+            paypal_dict['item_name_{}'.format(index)] = item.produto.nome
+            paypal_dict['quantity_{}'.format(index)] = item.quantidade
+            index = index + 1
+        return paypal_dict
 
 class PedidoItem(models.Model):
 

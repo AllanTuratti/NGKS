@@ -25,7 +25,7 @@ SECRET_KEY = 'lg%b2l7jo-y)-#+pcm5^liy1pwud^s^6(_-r=i1xn80-a4usdn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,8 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #libs
+    #'bootstrap3',
     'widget_tweaks',
+    'paypal.standard.ipn',
     #apps
+    #'SGU',
     'core',
     'catalogo',
     'checkout',
@@ -147,4 +150,22 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index'
 
 #MESSAGE
+from django.contrib.messages import constants as messages_constants 
+MESSAGE_TAGS = {
+    messages_constants.DEBUG: 'debug',
+    messages_constants.INFO:  'info',
+    messages_constants.SUCCESS:'sucess',
+    messages_constants.WARNING:'warning',
+    messages_constants.ERROR: 'danger',
+}
 
+#PAGSEGURO
+
+PAGSEGURO_TOKEN = 'FBC0605AB7D44E0091DF25007031ECAC'
+PAGSEGURO_EMAIL= 'allan.turatti@gmail.com'
+PAGSEGURO_SANDBOX = True
+
+#PAYPAL
+
+PAYPAL_TEST = True
+PAYPAL_EMAIL= 'allan-mt@hotmail.com'

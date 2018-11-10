@@ -1,5 +1,12 @@
-from django.shortcuts import get_object_or_404
+from pagseguro import PagSeguro
+
+from paypal.standard.forms import PayPalPaymentsForm
+from paypal.standard.models import  ST_PP_COMPLETED
+from paypal.standard.ipn.signals import valid_ipn_received
+
 from django.views.generic import RedirectView, TemplateView, ListView, DetailView
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import modelformset_factory
 from django.contrib import messages
@@ -78,6 +85,7 @@ class CheckoutView(LoginRequiredMixin, TemplateView):
             pedido = Pedido.objects.criar_pedido(
                 user=request.user, cart_items=cart_items
             )
+            cart_items.delete()
         else:
             messages.info(request, 'Não há itens no carrinho de compras')
             return redirect('checkout:cart_item')
@@ -88,7 +96,7 @@ class CheckoutView(LoginRequiredMixin, TemplateView):
 class ListaPedidoView(LoginRequiredMixin, ListView):
 
     template_name = 'lista_pedido.html'
-    paginate_by = 10
+    paginate_by = 5
 
     def get_queryset(self):
         return Pedido.objects.filter(user=self.request.user)
@@ -99,8 +107,95 @@ class DetalhePedidoView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return Pedido.objects.filter(user=self.request.user)
 
+class PagSeguroView(LoginRequiredMixin, RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        pedido_pk = self.kwargs.get('pk')
+        pedido = get_object_or_404(
+            Pedido.objects.filter(user=self.request.user), pk=pedido_pk
+        )
+        pg = pedido.pagseguro()
+        pg.redirect_url = self.request.build_absolute_uri(
+            reverse('checkout:detalhe_pedido', args=[pedido.pk])
+        )
+        pg.notification_url = self.request.build_absolute_uri(
+            reverse('checkout:pagseguro_notification')
+        )
+        response = pg.checkout()
+        return response.payment_url
+        
+class PaypalView(LoginRequiredMixin, TemplateView):
+
+    template_name = 'paypal.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PaypalView, self).get_context_data(**kwargs)
+        pedido_pk = self.kwargs.get('pk')
+        pedido = get_object_or_404(
+            Pedido.objects.filter(user=self.request.user), pk=pedido_pk
+        )
+        paypal_dict = pedido.paypal()
+        paypal_dict['return_url'] = self.request.build_absolute_uri(
+            reverse('checkout:lista_pedido')
+        )
+        paypal_dict['cancel_return'] = self.request.build_absolute_uri(
+            reverse('checkout:lista_pedido')
+        )
+        paypal_dict['notify_url'] = self.request.build_absolute_uri(
+            reverse('paypal:paypal-ipn')
+        )
+        context['form'] = PayPalPaymentsForm(initial=paypal_dict)
+        return context
+
+
+@csrf_exempt
+def pagseguro_notification(request):
+    notification_code = request.POST.get('notificationCode', None)
+    if notification_code:
+        pg = PagSeguro(
+            email=settings.PAGSEGURO_EMAIL, token=settings.PAGSEGURO_TOKEN,
+            config={'sandbox': settings.PAGSEGURO_SANDBOX}
+        )
+        notification_data = pg.check_notification(notification_code)
+        status = notification_data.status
+        reference = notification_data.reference
+        try:
+            pedido = Pedido.objects.get(pk=reference)
+        except Pedido.DoesNotExist:
+            pass
+        else:
+            pedido.pagseguro_update_status(status)
+    return HttpResponse('OK')
+
+
+
+
+def paypal_notification(sender, **kwargs):
+    ipn_obj = sender
+    if ipn_obj.status == ST_PP_COMPLETED and \
+        ipn_obj.receiver_email == settings.PAYPAL_EMAIL:
+        try:
+            order = Pedido.objects.get(pk=ipn_obj.invoice)
+            order.complete()
+        except Pedido.DoesNotExist:
+            pass
+
+
+valid_ipn_received.connect(paypal_notification)
+
+pagseguro_view = PagSeguroView.as_view()
+paypal_view = PaypalView.as_view()
 create_cartitem = CreateCartItemView.as_view()
 cart_item = CartItemView.as_view()
 checkout = CheckoutView.as_view()
 lista_pedido = ListaPedidoView.as_view()
 detalhe_pedido = DetalhePedidoView.as_view()
+
+
+
+
+
+
+
+
+
